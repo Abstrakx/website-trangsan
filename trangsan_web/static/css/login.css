@@ -1,0 +1,229 @@
+/* ================================
+   Importing google fonts 
+=================================== */
+@import url('https://fonts.googleapis.com/css2?family=Lilita+One&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+/* ================================
+   General Body Styles
+=================================== */
+body {
+    background-color: #fff;
+    font-family: 'Karla', sans-serif; }
+    
+  h1 > a {
+      text-decoration:none;
+      color:#fff !important;
+  }
+  
+/* ================================
+   Intro Section Styles
+=================================== */
+.intro-section {
+    background-image: url(../images/login_hero.png);
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    padding: 55px 95px;
+    min-height: 100vh;
+    display: -webkit-box;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    flex-direction: column;
+    color: #ffffff; 
+}
+
+@media (max-width: 991px) {
+.intro-section {
+        padding-left: 50px;
+        padding-right: 50px; 
+    } 
+}
+
+@media (max-width: 767px) {
+.intro-section {
+        padding: 28px; 
+    } 
+}
+
+@media (max-width: 575px) {
+.intro-section {
+        min-height: auto; 
+    } 
+}
+
+
+/* ================================
+   Brand Wrapper Styles
+=================================== */
+.brand-wrapper .logo {
+    height: 35px; 
+}
+
+@media (max-width: 767px) {
+.brand-wrapper {
+        margin-bottom: 35px; 
+    } 
+}
+
+.intro-content-wrapper {
+    width: 500px;
+    max-width: 100%;
+    margin-top:200px;
+    margin-bottom: auto; 
+}
+
+
+/* ================================
+   Intro Content Styles LEFT
+=================================== */
+.intro-content-wrapper .intro-title {
+    font-size: 45px;
+    font-weight: normal;
+    margin-bottom: 17px; 
+    font-family: 'Lilita One', sans-serif;
+    color: #f59a00;
+}
+
+.intro-content-wrapper .intro-text {
+    font-size: 19px;
+    line-height: 1.37; 
+    color: #4d3100;
+    font-family: 'Poppins', sans-serif;
+}
+  
+@media (max-width: 767px) {
+.intro-content-wrapper {
+        width: 500px;
+        max-width: 100%;
+        margin-top: auto;
+        margin-bottom: auto; 
+    }
+
+.intro-content-wrapper .intro-text {
+        font-size: 19px;
+        line-height: 1.37; 
+        color: #7e7668;
+        font-family: 'Poppins', sans-serif;
+    }
+}
+
+/* ================================
+   Form Section
+=================================== */
+.form-section {
+    display: -webkit-box;
+    display: flex;
+    -webkit-box-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    justify-content: center; 
+}
+
+@media (max-width: 767px) {
+.form-section {
+        padding: 35px; 
+    } 
+}
+  
+/* ================================
+   Login Content Styles RIGHT
+=================================== */
+.login-wrapper {
+    width: 400px;
+    max-width: 100%; 
+}
+
+@media (max-width: 575px) {
+.login-wrapper {
+        width: 100%; 
+    } 
+}
+    
+.login-wrapper .form-control {
+    border: 1;
+    border-bottom: 1px solid #e7e7e7;
+    border-radius: 0;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 15px 10px;
+    margin-bottom: 7px; 
+}
+      
+.login-wrapper .form-control::-webkit-input-placeholder {
+    color: #b0adad; }
+      
+.login-wrapper .form-control::-moz-placeholder {
+    color: #b0adad; }
+      
+.login-wrapper .form-control:-ms-input-placeholder {
+    color: #b0adad; }
+      
+.login-wrapper .form-control::-ms-input-placeholder {
+    color: #b0adad; }
+      
+.login-wrapper .form-control::placeholder {
+    color: #b0adad; }
+  
+.login-title {
+    font-size: 30px;
+    font-weight: bold;
+    margin-bottom: 30px; 
+}
+  
+.loginBox {
+    width: 400px;
+    min-height: 300px;
+    background: #fff; 
+    border-radius: 10px;
+    padding: 40px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+}
+  
+.login-btn {
+    padding: 10px 30px;
+    background-color: #000;
+    border-radius: 10px ;
+    font-size: 20px;
+    font-weight: bold;
+    color: #fff; 
+}
+    
+.login-btn:hover {
+    border: 1px solid #000;
+    background-color: transparent;
+    color: #000; 
+}
+  
+  
+/* ================================
+   Dot Styles
+=================================== */
+.dots-wrapper {
+    display: flex;
+    gap: 8px; 
+    top: 10px;
+    left: 20px;
+    margin-bottom: 10px;
+    margin-top: -10px;
+}
+
+.dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: gray;
+}
+
+.dot.red {
+    background-color: #ff5f56; 
+}
+
+.dot.yellow {
+    background-color: #ffbd2e; 
+}
+
+.dot.green {
+    background-color: #27c93f; 
+}
