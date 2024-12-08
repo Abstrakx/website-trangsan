@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -6,6 +6,7 @@ from rest_framework import viewsets
 from .models import Aduan
 from .utils import generate_prioritas_catatan
 from .serializers import AduanSerializer
+from .forms import AduanStatusForm
 
 # Menampilkan view aduan ke dalam REST API
 class AduanViewSet(viewsets.ModelViewSet):
@@ -21,7 +22,7 @@ class CustomLoginView(LoginView):
         return super().form_invalid(form)
 
 # View untuk dashboard aduan
-@login_required()
+@login_required(login_url='login')
 def dashboard_aduan(request):
     # Fetch semua data aduan
     aduan_list = Aduan.objects.all()
@@ -55,3 +56,24 @@ def dashboard_aduan(request):
     }
 
     return render(request, "dashboard_aduan.html", context)
+
+# View untuk mengubah status aduan di dashboard aduan
+@login_required(login_url='login')
+def update_status_aduan(request, aduan_id):
+    # Fetch semua data aduan
+    aduan = get_object_or_404(Aduan, id=aduan_id)
+
+    if request.method == "POST":
+        form = AduanStatusForm(request.POST, instance=aduan)
+
+        # Melakukan validasi form dan menyimpan data
+        if form.is_valid():
+            # Simpan ke database
+            form.save()
+            
+            # Redirect ke dashboard view yang sama
+            return redirect("dashboard_aduan")
+    else:
+        form = AduanStatusForm(instance=aduan)
+    
+    return render(request, "dashboard_aduan.html", {"form": form})

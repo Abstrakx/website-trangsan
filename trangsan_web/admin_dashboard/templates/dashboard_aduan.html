@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.png' %}" >
 
@@ -32,7 +33,7 @@
     <nav class="navbar navbar-expand-lg navbar-light">
         <div class="container-fluid">
             <a class="navbar-brand">
-                <img src="{% static 'images/logo.png' %}" alt="Logo" width="210" height="66" class="d-inline-block align-text-top" />
+                <img src="{% static 'images/logo.png' %}" alt="Logo" class="logo d-inline-block align-text-top" />
             </a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -40,16 +41,19 @@
             </button>
 
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
+                <ul class="navbar-nav ms-auto button-layout">
                     <li class="nav-item w-100"> 
                         <form method="POST" action="{% url 'logout' %}">
                             {% csrf_token %}
-                            <button type="submit" class="btn btn-danger w-100 mx-auto" style="border: 0.5px solid black;">Logout</button>
+                            <button type="submit" class="btn-logout w-100 mx-auto">
+                                Logout
+                                <img src="{% static 'icons/logout.svg' %}" alt="Logout" class="logout-icon" />
+                            </button>
                         </form>
                     </li>
                 </ul>
             </div>
-            
+
         </div>
     </nav>
 
@@ -60,20 +64,51 @@
                 <!-- Table Title -->
                 <div class="table-title">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h2>Manage Data <b>Aduan Masyarakat</b></h2>
+                        <!-- Component Aduan Masyarakat -->
+                        <div class="component" style="background-color: #22539c;">
+                            <div class="button">
+                                <img src="{% static 'icons/computer_white.svg' %}" alt="computer" class="vector" />
+                                <div class="text-wrapper" style="color: #ffffff; ">Data Aduan Masyarakat</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Component Peminjaman Barang -->
+                        <a href="#addAduanModal" class="component" style="background-color: #EBE8E4; text-decoration: none;">
+                            <div class="button">
+                                <img src="{% static 'icons/storage.svg' %}" alt="storage" class="vector" />
+                                <div class="text-wrapper" style="color: #A09B99; ">Peminjaman Barang</div>
+                            </div>
+                        </a>
+
+                        <!-- Component Data Barang -->
+                        <a href="#addAduanModal" class="component" style="background-color: #EBE8E4; text-decoration: none;">
+                            <div class="button">
+                                <img src="{% static 'icons/storage.svg' %}" alt="storage" class="vector" />
+                                <div class="text-wrapper" style="color: #A09B99; ">Data Barang</div>
+                            </div>
+                        </a>
+
+                        <!-- Component Absensi -->
+                        <a href="#addAduanModal" class="component" style="background-color: #EBE8E4; text-decoration: none;">
+                            <div class="button">
+                                <img src="{% static 'icons/presence.svg' %}" alt="presence" class="vector" />
+                                <div class="text-wrapper" style="color: #A09B99; ">Data Absen</div>
+                            </div>
+                        </a>
+
                         <div class="btn-group mt-md-0">		
                             <a href="#addAduanModal" class="btn btn-success" data-toggle="modal">
-                                <i class="material-icons">&#xE147;</i> <span>Add Data Aduan</span>
+                                <div class="icon-wrapper">+</div>
+                                <div class="text-wrapper">Tambah Data Aduan</div>
                             </a>
                         </div>
                     </div>
                 </div>
 
                 <!-- Barang Data Table -->
-                <table class="table table-striped table-hover table-bordered">
+                <table class="table table-borderless table-striped table-hover">
                     <thead>
                         <tr>
-                            <th>ID</th>
                             <th>Nama Pengadu</th>
                             <th>Tanggal</th>
                             <th>Isi Aduan</th>
@@ -84,17 +119,41 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- Display Barang Data -->
+                        <!-- Display Aduan Data -->
                         {% if aduan_list %}
                             {% for aduan in aduan_list %}
                             <tr>
-                                <td>{{ aduan.id }}</td>
                                 <td>{{ aduan.nama_pengadu }}</td>
                                 <td>{{ aduan.tanggal_aduan }}</td>
                                 <td>{{ aduan.isi_aduan }}</td>
-                                <td>{{ aduan.status }}</td>
+                                <td>
+                                    <form method="POST" action="{% url 'update_status_aduan' aduan.id %}">
+                                        {% csrf_token %}
+                                        <div class="dropdown">
+                                            <select name="status" class="form-control" onchange="this.form.submit()">
+                                                <option value="Baru" {% if aduan.status == 'Baru' %}selected{% endif %}>Baru</option>
+                                                <option value="Diproses" {% if aduan.status == 'Diproses' %}selected{% endif %}>Diproses</option>
+                                                <option value="Selesai" {% if aduan.status == 'Selesai' %}selected{% endif %}>Selesai</option>
+                                            </select>
+                                        </div>
+                                    </form>
+                                </td>
                                 <td>{{ aduan.kategori }}</td>
-                                <td>{{ aduan.prioritas }}</td>
+                                <td>
+                                    {% if aduan.prioritas == 'Tinggi' %}
+                                    <div class="btn-status" style="background-color: #9c1010;">
+                                        <div class="text-wrapper" style="color: #ffffff;">{{ aduan.prioritas }}</div>
+                                    </div>
+                                    {% elif aduan.prioritas == 'Sedang' %}
+                                    <div class="btn-status" style="background-color: #ea961080;">
+                                        <div class="text-wrapper" style="color: #694000;">{{ aduan.prioritas }}</div>
+                                    </div>
+                                    {% elif aduan.prioritas == 'Rendah' %}
+                                    <div class="btn-status" style="background-color: #9c101040;">
+                                        <div class="text-wrapper" style="color: #9c1010;">{{ aduan.prioritas }}</div>
+                                    </div>
+                                    {% endif %}
+                                </td>
                                 <td>{{ aduan.catatan }}</td>
                             </tr>
                             {% endfor %}

@@ -1,6 +1,16 @@
 from django import forms    
+from .models import Aduan
 
-# CHANGE THIS
-class login_member_form(forms.Form):
-    username = forms.CharField(label="Username", max_length=150, required=True)
-    password = forms.CharField(widget=forms.PasswordInput, label="Password", required=True)
+# Form untuk mengubah status aduan
+class AduanStatusForm(forms.ModelForm):
+    class Meta:
+        model = Aduan
+        fields = ['status'] 
+
+    STATUS_CHOICES = [
+        ('Baru', 'Baru'),
+        ('Diproses', 'Diproses'),
+        ('Selesai', 'Selesai'),
+    ]
+    
+    status = forms.ChoiceField(choices=STATUS_CHOICES, widget=forms.Select(attrs={'class': 'form-control'}))

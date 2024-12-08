@@ -8,28 +8,28 @@ class Aduan(models.Model):
     status = models.CharField(
         max_length=20,
         choices=[
-            ('baru', 'Baru'),
-            ('diproses', 'Diproses'),
-            ('selesai', 'Selesai'),
+            ('Baru', 'Baru'),
+            ('Diproses', 'Diproses'),
+            ('Selesai', 'Selesai'),
         ]
     )
     kategori = models.CharField(
         max_length=20,
         choices=[
-            ('administrasi', 'Administrasi'),
-            ('infrastruktur', 'Infrastruktur'),
-            ('kamtibmas', 'Kamtibmas'),
-            ('kebersihan', 'Kebersihan'),
-            ('anggaran', 'Anggaran'),
-            ('lainnya', 'Lainnya'),
+            ('Administrasi', 'Administrasi'),
+            ('Infrastruktur', 'Infrastruktur'),
+            ('Kamtibmas', 'Kamtibmas'),
+            ('Kebersihan', 'Kebersihan'),
+            ('Anggaran', 'Anggaran'),
+            ('Lainnya', 'Lainnya'),
         ]
     )
     prioritas = models.CharField(
         max_length=10,
         choices=[
-            ('tinggi', 'Tinggi'),
-            ('sedang', 'Sedang'),
-            ('rendah', 'Rendah')
+            ('Tinggi', 'Tinggi'),
+            ('Sedang', 'Sedang'),
+            ('Rendah', 'Rendah')
         ],
         blank=True,  
         null=True
