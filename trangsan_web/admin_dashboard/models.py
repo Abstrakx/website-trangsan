@@ -115,3 +115,55 @@ class User(models.Model):
 
     def __str__(self):
         return f"{self.nama_user} ({self.id_user})"
+
+# Database model peminjaman barang desa trangsan
+class PeminjamanBarang(models.Model):
+    class Status(models.TextChoices):
+        DIAJUKAN = 'Diajukan', 'Diajukan'
+        DITERIMA = 'Diterima', 'Diterima'
+        DIKEMBALIKAN = 'Dikembalikan', 'Dikembalikan'
+        DITOLAK = 'Ditolak', 'Ditolak'
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    barang = models.ForeignKey(Barang, on_delete=models.CASCADE)
+    tanggal_pinjam = models.DateField(auto_now_add=True)
+    tanggal_kembali = models.DateField(null=True, blank=True)
+    jumlah_pinjam = models.PositiveIntegerField()
+    status = models.CharField(
+        max_length=50,
+        choices=Status.choices,
+        default=Status.DIAJUKAN, 
+    )
+    kondisi_awal = models.ImageField(upload_to='kondisi_awal/', blank=True, null=True)
+    kondisi_akhir = models.ImageField(upload_to='kondisi_akhir/', blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.user.nama_user} ({self.barang.nama_barang})"
+    
+    def is_terlambat(self):
+        if self.tanggal_kembali and self.tanggal_kembali > self.tanggal_pinjam:
+            return True
+        return False
+    
+    def is_tersedia(self, jumlah_pinjam):
+        return self.jumlah >= jumlah_pinjam
+
+    def save(self, *args, **kwargs):
+        # Mengurangi jumlah barang di database barang jika statusnya diterima
+        if self.status == self.Status.DITERIMA:  
+            if self.barang.jumlah < self.jumlah_pinjam:
+                raise ValueError("Barang tidak mencukupi!")
+            self.barang.jumlah -= self.jumlah_pinjam
+            self.barang.save()
+
+        # Mengembalikan jumlah barang jika barang dikembalikan
+        if self.status == self.Status.DIKEMBALIKAN:
+            self.barang.jumlah += self.jumlah_pinjam
+            self.barang.save()
+
+        # Mengganti status barang jika barang kosong
+        if self.barang.jumlah == 0:
+            self.barang.status = 'Stok Kosong'
+            self.barang.save()
+
+        super().save(*args, **kwargs)

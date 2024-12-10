@@ -1,19 +1,35 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.hashers import make_password, check_password
+from django.contrib.auth.hashers import make_password
 from django.core.files.storage import default_storage
 from django.contrib import messages
+from django.utils import timezone
 from rest_framework import viewsets
-from .models import Aduan, Barang, User
+from .models import Aduan, Barang, User, PeminjamanBarang
 from .utils import generate_prioritas_catatan
-from .serializers import AduanSerializer
-from .forms import AduanStatusForm, UserForm
+from .serializers import AduanSerializer, UserSerializer, PeminjamanBarangSerializer, BarangSerializer
+from .forms import AduanStatusForm, UserForm, PeminjamanForm, PeminjamanBarangStatusForm
 
 # Menampilkan view aduan ke dalam REST API
 class AduanViewSet(viewsets.ModelViewSet):
     queryset = Aduan.objects.all()
     serializer_class = AduanSerializer
+
+# Menampilkan view user ke dalam REST API
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+# Menampilkan view peminjaman barang ke dalam REST API
+class PeminjamanBarangViewSet(viewsets.ModelViewSet):
+    queryset = PeminjamanBarang.objects.all()
+    serializer_class = PeminjamanBarangSerializer
+
+# Menampilkan view barang ke dalam REST API
+class BarangViewSet(viewsets.ModelViewSet):
+    queryset = Barang.objects.all()
+    serializer_class = BarangSerializer
 
 # Class untuk login view admin 
 class CustomLoginView(LoginView):
@@ -152,7 +168,7 @@ def edit_barang(request):
     # Redirect ke dashboard view yang sama
     return redirect("dashboard_barang")
 
-# View untuk dashboard stok absensi user dan menambahkan data user di admin
+# View untuk dashboard absensi user dan menambahkan data user di admin
 @login_required(login_url='login')
 def dashboard_user(request):
     user_list = User.objects.all()
@@ -201,7 +217,7 @@ def delete_user(request):
                 profile_picture_path = user.profile_picture.name
                 if default_storage.exists(profile_picture_path):
                     default_storage.delete(profile_picture_path)
-                    
+
             user.delete()
         else:
             messages.error(request, 'Invalid ID.')
@@ -261,3 +277,96 @@ def edit_user(request):
 
     # Redirect ke dashboard view yang sama
     return redirect("dashboard_user")
+
+# View untuk dashboard stok absensi user dan menambahkan data user di admin
+@login_required(login_url='login')
+def dashboard_peminjaman_barang(request):
+    peminjaman_list = PeminjamanBarang.objects.all()
+
+    if request.method == "POST":
+        form = PeminjamanForm(request.POST, request.FILES)
+
+        # Melakukan validasi form dan menyimpan data
+        if form.is_valid():
+            peminjaman = form.save(commit=False)
+            peminjaman.save()
+            
+            # Redirect ke dashboard view yang sama
+            return redirect("dashboard_peminjaman_barang")
+        else:
+            messages.error(request, 'Invalid form.')
+    else:
+        form = PeminjamanForm()
+    
+    # Pass User list dan form context ke template
+    context = {
+        "form": form,
+        "peminjaman_list": peminjaman_list,
+    }
+
+    return render(request, "dashboard_peminjaman.html", context)
+
+# View untuk menghapus peminjaman di dashboard peminjaman
+@login_required(login_url='login')
+def delete_peminjaman_barang(request):
+    if request.method == "POST":
+        id = request.POST["id"]
+        
+        # Hapus data peminjaman dari database jika request valid
+        if id: 
+            peminjaman = get_object_or_404(PeminjamanBarang, id=id)
+            # Menghapus foto kondisi awal data peminjaman jika ada
+            if peminjaman.kondisi_awal:
+                kondisi_awal_path = peminjaman.kondisi_awal.name
+                if default_storage.exists(kondisi_awal_path):
+                    default_storage.delete(kondisi_awal_path)
+
+            # Menghapus foto kondisi akhir data peminjaman jika ada
+            if peminjaman.kondisi_akhir:
+                kondisi_akhir_path = peminjaman.kondisi_akhir.name
+                if default_storage.exists(kondisi_akhir_path):
+                    default_storage.delete(kondisi_akhir_path)
+
+            peminjaman.delete()
+        else:
+            messages.error(request, 'Invalid ID.')
+
+    # Redirect ke dashboard view yang sama
+    return redirect("dashboard_user")
+
+# View untuk mengubah status peminjaman di dashboard peminjaman
+@login_required(login_url='login')
+def update_status_peminjaman(request, peminjaman_id):
+    # Fetch semua data peminjaman
+    peminjaman = get_object_or_404(PeminjamanBarang, id=peminjaman_id)
+
+    if request.method == "POST":
+        form = PeminjamanBarangStatusForm(request.POST, instance=peminjaman)
+
+        # Melakukan validasi form dan menyimpan data
+        if form.is_valid():
+            # Simpan ke database
+            form.save()
+            
+            # Redirect ke dashboard view yang sama
+            return redirect("dashboard_peminjaman_barang")
+    else:
+        form = PeminjamanBarangStatusForm(instance=peminjaman)
+    
+    return render(request, "dashboard_peminjaman.html", {"form": form})
+
+# View untuk mengubah status peminjaman ke Dikembalikan di dashboard peminjaman
+@login_required(login_url='login')
+def update_status_dikembalikan(request, peminjaman_id):
+    # Fetch semua data pemijaman
+    peminjaman = get_object_or_404(PeminjamanBarang, pk=peminjaman_id)
+
+    # Mengganti status peminjaman barang ke dikembalikan
+    peminjaman.status = PeminjamanBarang.Status.DIKEMBALIKAN
+    peminjaman.tanggal_kembali = timezone.now()
+
+    # Simpan ke database
+    peminjaman.save()
+
+    # Redirect ke dashboard view yang sama
+    return redirect('dashboard_peminjaman_barang')

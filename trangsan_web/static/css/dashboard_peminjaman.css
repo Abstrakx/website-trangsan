@@ -1,0 +1,440 @@
+/* ================================
+   Importing google fonts 
+=================================== */
+@import url('https://fonts.googleapis.com/css?family=Montserrat');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+/* ================================
+   General Body Styles
+=================================== */
+body {
+    color: #566787;
+    background: #f5f5f5;
+    font-family: 'Varela Round', sans-serif;
+    font-size: 13px;
+}
+
+/* ================================
+   Navbar Custom Styles
+=================================== */
+.navbar-custom {
+    background-color: #d37000;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    font-family: 'Montserrat';
+}
+
+.navbar-text-custom {
+    padding-top: 10px;
+}
+
+.logo {
+    width: 100%; 
+    max-width: 270px; 
+    height: 84px; 
+    margin-left: 10px;
+}
+
+
+@media (max-width: 768px) {
+.logo {
+        max-width: 240px; 
+        height: 65px; 
+    }
+}
+
+@media (max-width: 576px) {
+.logo {
+        max-width: 150px; 
+    }
+}
+
+.btn-logout {
+    font-family: 'Poppins', sans-serif;
+    background-color: #9C1010;
+    color: #fff; 
+    padding: 12px 30px; 
+    font-size: 16px; 
+    font-weight: bold; 
+    border: none; 
+    border-radius: 5px; 
+    cursor: pointer; 
+    transition: background-color 0.3s ease; 
+}
+
+.button-layout {
+    margin-right: 0px; 
+}
+
+@media (min-width: 768px) {
+.button-layout {
+        margin-right: 20px; 
+    }
+}
+
+.btn-logout:hover {
+    background-color: #c82333; 
+}
+
+.logout-icon {
+    margin-left: 5px;
+    object-fit: contain; 
+  }
+
+/* ================================
+   Table Styles
+=================================== */
+.table-responsive {
+    margin: 30px 0;
+}
+
+.table-wrapper {
+    background: #fff;
+    padding: 20px 0px;
+    border-radius: 3px;
+    min-width: 1850px;
+    box-shadow: 0 1px 1px rgba(0,0,0,.05);
+}
+
+.table-wrapper-fix {
+    padding: 0px 25px;
+}
+
+.computer-icon {
+    margin-right: 10px;
+    object-fit: contain; 
+}
+
+.table-title {
+    position: relative;
+    width: fit-content;
+    margin-top: -1.00px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    color: #000000;
+    font-size: 24px;
+    letter-spacing: 0;
+    line-height: normal;
+    padding: 16px 0px 15px;
+    padding-right: 20px;
+    min-width: 100%;
+    margin: -20px 0px 10px 0px;
+    margin-left: 20px;
+}
+
+.table-title h2 {
+    margin: 5px 0 0;
+    font-size: 24px;
+    font-weight: 510;
+}
+
+.table-title .btn-group {
+    float: right;
+}
+
+.table-title .btn {
+    display: flex;
+    width: 270px;
+    height: 42px; 
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 11px 19px;
+    position: relative;
+    background-color: #236231;
+    border-radius: 5px 5px 5px 5px;
+}
+
+.table-title .icon-wrapper {
+    position: relative;
+    width: fit-content;
+    margin-top: -4.50px;
+    margin-bottom: -2.50px;
+    margin-left: -2.50px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    color: #ffffff;
+    font-size: 14px;
+    letter-spacing: 0;
+    line-height: normal;
+}
+
+.table-title .text-wrapper {
+    position: relative;
+    width: fit-content;
+    margin-top: -4.50px;
+    margin-bottom: -2.50px;
+    margin-right: -2.50px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    color: #ffffff;
+    font-size: 14px;
+    letter-spacing: 0;
+    line-height: normal;
+}
+
+
+.component { 
+    display: flex;
+    flex-direction: column; 
+    width: 366px;
+    height: 42px; 
+    align-items: center; 
+    justify-content: center;
+    gap: 10px;
+    padding: 0px 9px; 
+    position: relative;
+    border-radius: 5px;
+    margin-right: 0px;
+}
+  
+.component .button { 
+    display: flex; 
+    width: 492px;
+    align-items: center; 
+    justify-content: center;
+    gap: 15px;
+    position: relative;
+    flex: 0 auto;
+    margin-left: -72.00px; margin-right: -72.00px;
+}
+  
+.component .vector {
+    position: relative;
+    width: 23px;
+    height: 23px;
+  }
+
+.component .text-wrapper { 
+    position: relative; 
+    width: fit-content;
+    margin-top: -1.00px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    font-size: 24px; 
+    letter-spacing: 0; 
+    line-height: normal;
+    margin-right: 5px;
+  }
+
+/* ================================
+   Table Rows and Cells Styling
+=================================== */
+table.table tr th, table.table tr td {
+    border-color: #e9e9e9;
+    padding: 12px 15px;
+    vertical-align: middle;
+    width: auto;
+}
+
+table.table {
+    width: 100%;
+    font-family: 'Poppins', sans-serif;
+    margin-left: 20px;
+    margin-right: 20px;
+    padding-right: 20px;
+}
+
+@media (min-width: 768px) {
+    .table.table {
+            width: 100%;
+    }
+}
+
+table.table tr th:first-child,
+table.table tr td:first-child {
+    width: 10%; /* Width for 'User Peminjaman' */
+}
+
+table.table tr th:nth-child(2),
+table.table tr td:nth-child(2) {
+    width: 10%; /* Width for 'Barang' */
+}
+
+table.table tr th:nth-child(3),
+table.table tr td:nth-child(3) {
+    width: 10%; /* Width for 'Tanggal Peminjaman' */
+}
+
+table.table tr th:nth-child(4),
+table.table tr td:nth-child(4) {
+    width: 15%; /* Width for 'Tanggal Pengembalian' */
+}
+
+table.table tr th:nth-child(5),
+table.table tr td:nth-child(5) {
+    width: 10%; /* Width for 'Jumlah' */
+}
+
+table.table tr th:nth-child(6),
+table.table tr td:nth-child(6) {
+    width: 10%; /* Width for 'Status' */
+}
+
+table.table tr th:nth-child(7),
+table.table tr td:nth-child(7) {
+    width: 10%; /* Width for 'Kondisi Awal' */
+}
+
+table.table tr th:nth-child(8),
+table.table tr td:nth-child(8) {
+    width: 10%; /* Width for 'Kondisi Akhir' */
+}
+
+table.table tr th:nth-child(9),
+table.table tr td:nth-child(9) {
+    width: 5%; /* Width for 'Action' */
+}
+
+/* ================================
+   Table Styling for Stripes and Hover
+=================================== */
+table.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(255, 242, 222, 0.5);
+}
+
+table.table-striped.table-hover tbody tr:hover {
+    background: #f5f5f5;
+}
+
+/* ================================
+   Table Icon and Links Styling
+=================================== */
+table.table th i {
+    font-size: 13px;
+    margin: 0 5px;
+    cursor: pointer;
+}
+
+table.table td:last-child i {
+    opacity: 0.9;
+    font-size: 22px;
+    margin: 0 5px;
+}
+
+table.table td a {
+    font-weight: bold;
+    color: #566787;
+    display: inline-block;
+    text-decoration: none;
+}
+
+table.table td a:hover {
+    color: #2196F3;
+}
+
+table.table td a.edit {
+    color: #FFC107;
+}
+
+table.table td a.delete {
+    color: #F44336;
+}
+
+table.table td i {
+    font-size: 19px;
+}
+
+table.table .avatar {
+    border-radius: 50%;
+    vertical-align: middle;
+    margin-right: 10px;
+}
+
+/* ================================
+   Button Property
+=================================== */
+.btn-status {
+    display: flex;
+    width: 110px;
+    height: 30px;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 11px 19px;
+    position: relative;
+    border-radius: 5px;
+}
+
+.btn-status .text-wrapper {
+    position: relative;
+    width: fit-content;
+    margin-top: -6.00px;
+    margin-bottom: -4.00px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    letter-spacing: 0;
+    line-height: normal;
+  }
+
+/* ================================
+   Hint Text Styles
+=================================== */
+.hint-text {
+    float: left;
+    margin-top: 10px;
+    font-size: 13px;
+}
+
+/* ================================
+   Modal Styles
+=================================== */
+.modal .modal-dialog {
+    max-width: 400px;
+}
+
+.modal .modal-header, .modal .modal-body, .modal .modal-footer {
+    padding: 20px 30px;
+}
+
+.modal .modal-content {
+    border-radius: 3px;
+    font-size: 14px;
+}
+
+.modal .modal-footer {
+    background: #ecf0f1;
+    border-radius: 0 0 3px 3px;
+}
+
+.modal .modal-title {
+    display: inline-block;
+}
+
+.modal .form-control {
+    border-radius: 2px;
+    box-shadow: none;
+    border-color: #dddddd;
+}
+
+.modal textarea.form-control {
+    resize: vertical;
+}
+
+.modal .btn {
+    border-radius: 2px;
+    min-width: 100px;
+}
+
+.modal form label {
+    font-weight: normal;
+}
+
+/* ================================
+   Images Modal Styles
+=================================== */
+.picture-preview {
+    display: flex;              
+    justify-content: center;    
+    align-items: center;                    
+    margin-bottom: 15px;        
+    text-align: center;         
+}
+
+.request-date {
+    text-align: center;         
+    font-size: 15px;            
+    margin-top: 10px;
+    font-family: 'Poppins', sans-serif;       
+}
