@@ -1,4 +1,10 @@
 from django.db import models
+from django.core.files import File
+from django.conf import settings
+from model_utils import FieldTracker
+from io import BytesIO
+import qrcode
+import os
 
 # Database model Aduan
 class Aduan(models.Model):
@@ -29,7 +35,7 @@ class Aduan(models.Model):
         choices=[
             ('Tinggi', 'Tinggi'),
             ('Sedang', 'Sedang'),
-            ('Rendah', 'Rendah')
+            ('Rendah', 'Rendah'),
         ],
         blank=True,  
         null=True
@@ -38,3 +44,74 @@ class Aduan(models.Model):
 
     def __str__(self):
         return f"Aduan dari {self.nama_pengadu} - {self.prioritas}"
+    
+# Database model Barang 
+class Barang(models.Model):
+    kode_barang = models.CharField(max_length=20, primary_key=True)
+    nama_barang = models.CharField(max_length=100)
+    kondisi_barang = models.CharField(
+        max_length=50,
+        choices=[
+            ("Baik", "Baik"),
+            ("Dalam Perbaikan", "Dalam Perbaikan"),
+            ("Rusak", "Rusak"),
+        ]
+    )
+    status = models.CharField(
+        max_length=50,
+        choices=[
+            ("Tersedia", "Tersedia"),
+            ("Stok Kosong", "Stok Kosong"),
+        ]
+    )
+    jumlah = models.PositiveIntegerField()
+
+    def __str__(self):
+        return f"{self.nama_barang} ({self.kode_barang})"
+    
+# Database model Absensi dan data karyawan serta warga desa
+class User(models.Model):
+    id_user = models.CharField(max_length=20, primary_key=True)
+    nama_user = models.CharField(max_length=255)
+    username = models.CharField(max_length=150)
+    password = models.CharField(max_length=255)
+    jabatan = models.CharField(max_length=255) 
+    status = models.CharField(
+        max_length=50,
+        choices=[
+            ('Pemerintah Desa', 'Pemerintah Desa'),
+            ('Masyarakat', 'Masyarakat'),
+        ]
+    )
+    qr_code_user = models.ImageField(upload_to='qr_code_user/', blank=True, null=True)
+    last_in = models.JSONField(default=list)
+    profile_picture = models.ImageField(upload_to='profile_picture/', blank=True, null=True)
+
+    # Field tracker untuk melacak perubahan field tertentu
+    tracker = FieldTracker(fields=['id_user', 'nama_user', 'jabatan', 'status'])
+
+    def save(self, *args, **kwargs):
+        if self.status == 'Pemerintah Desa':
+            nama_depan = self.nama_user.split(" ")[0]
+
+            # Logika untuk Auntentikasi QR Code
+            if not self.qr_code_user or self._state.adding or self.tracker.has_changed('id_user') or self.tracker.has_changed('nama_user') or self.tracker.has_changed('jabatan') or self.tracker.has_changed('status'):
+                # Hapus file QR mahasiswa lama
+                if self.qr_code_user:
+                    qr_path = os.path.join(settings.MEDIA_ROOT, self.qr_code_user.name)
+                    if os.path.exists(qr_path):
+                        os.remove(qr_path)
+                    self.qr_code_user.delete(save=False)
+
+                # Generate QR mahasiswa baru
+                qrcode_img = qrcode.make(f'{self.id_user}-{nama_depan}-{self.jabatan}')
+                qr_io = BytesIO()
+                qrcode_img.save(qr_io, 'PNG')
+                qr_file = File(qr_io, name=f'{self.id_user}-{nama_depan}-{self.jabatan}.png')
+                self.qr_code_user.save(qr_file.name, qr_file, save=False)
+    
+        # Simpan objek ke database
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.nama_user} ({self.id_user})"

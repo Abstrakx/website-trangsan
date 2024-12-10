@@ -9,7 +9,7 @@
     <title>Dashboard Aduan Masyarakat</title>
 
     <!-- External Stylesheets -->
-    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard_aduan.css' %}">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap">
@@ -80,16 +80,16 @@
                             </div>
                         </a>
 
-                        <!-- Component Data Barang -->
-                        <a href="#addAduanModal" class="component" style="background-color: #EBE8E4; text-decoration: none;">
+                        <!-- Component Data Inventaris   -->
+                        <a href="{% url 'dashboard_barang' %}" class="component" style="background-color: #EBE8E4; text-decoration: none;">
                             <div class="button">
                                 <img src="{% static 'icons/storage.svg' %}" alt="storage" class="vector" />
-                                <div class="text-wrapper" style="color: #A09B99; ">Data Barang</div>
+                                <div class="text-wrapper" style="color: #A09B99; ">Data Inventaris</div>
                             </div>
                         </a>
 
                         <!-- Component Absensi -->
-                        <a href="#addAduanModal" class="component" style="background-color: #EBE8E4; text-decoration: none;">
+                        <a href="{% url 'dashboard_user' %}" class="component" style="background-color: #EBE8E4; text-decoration: none;">
                             <div class="button">
                                 <img src="{% static 'icons/presence.svg' %}" alt="presence" class="vector" />
                                 <div class="text-wrapper" style="color: #A09B99; ">Data Absen</div>

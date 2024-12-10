@@ -2,3 +2,4 @@
 /.env
 /trangsan_web/admin_dashboard/migrations
 /trangsan_web/db.sqlite3
+/trangsan_web/media

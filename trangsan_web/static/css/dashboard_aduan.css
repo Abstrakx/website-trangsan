@@ -280,7 +280,7 @@ table.table tr td:nth-child(7) {
    Table Styling for Stripes and Hover
 =================================== */
 table.table-striped tbody tr:nth-of-type(odd) {
-    background-color: #FFF2DE;
+    background-color: rgba(255, 242, 222, 0.5);
 }
 
 table.table-striped.table-hover tbody tr:hover {
