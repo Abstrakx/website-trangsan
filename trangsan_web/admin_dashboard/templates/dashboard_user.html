@@ -1,4 +1,5 @@
 {% load static %}
+{% load custom_filters %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -33,7 +34,7 @@
     <nav class="navbar navbar-expand-lg navbar-light">
         <div class="container-fluid">
             <a class="navbar-brand">
-                <img src="{% static 'images/logo.png' %}" alt="Logo" class="logo d-inline-block align-text-top" />
+                <img src="{% static 'images/logo_trangsan.png' %}" alt="Logo" class="logo d-inline-block align-text-top" />
             </a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -83,7 +84,7 @@
                         <!-- Component Data Inventaris -->
                         <a href="{% url 'dashboard_barang' %}" class="component" style="background-color: #EBE8E4; text-decoration: none;">
                             <div class="button">
-                                <img src="{% static 'icons/presence.svg' %}" alt="presence" class="vector" />
+                                <img src="{% static 'icons/storage.svg' %}" alt="storage" class="vector" />
                                 <div class="text-wrapper" style="color: #A09B99; ">Data Inventaris</div>
                             </div>
                         </a>
@@ -105,7 +106,7 @@
                     </div>
                 </div>
 
-                <!-- Barang Data Table -->
+                <!-- User Data Table -->
                 <table class="table table-borderless table-striped table-hover">
                     <thead>
                         <tr>
@@ -155,7 +156,7 @@
                                             {% if last_in_item %}
                                                 <div>
                                                     {% if last_in_item.datetime %}
-                                                        {{ last_in_item.datetime }}
+                                                        {{ last_in_item.datetime|format_iso_datetime }}
                                                     {% else %}
                                                         No datetime available
                                                     {% endif %}
@@ -169,7 +170,7 @@
                                     {% endif %}
                                 </td>                                                        
                                 <td>
-                                    <a href=" " class="btn btn-info text-light">View Details</a>
+                                    <a href="{% url 'user_detail' user.id_user %}" class="btn btn-info text-light">View Details</a>
                                 </td>  
                                 <td>
                                     <!-- Edit User Modal Trigger -->
@@ -272,7 +273,22 @@
                         </div>
                         <div class="form-group">
                             <label for="jabatan" class="form-label">Jabatan</label>
-                            <input type="text" class="form-control" id="jabatan" name="jabatan" required>                        
+                            <select class="form-select" id="jabatan" name="jabatan" required>    
+                                <option value="" selected disabled>Pilih Kategori</option>
+                                <option value="Kepala Desa">Kepala Desa</option>
+                                <option value="Sekretaris Desa">Sekretaris Desa</option>   
+                                <option value="Kaur TU">Kaur TU</option>   
+                                <option value="Kaur Keuangan">Kaur Keuangan</option>   
+                                <option value="Kaur Perencanaan">Kaur Perencanaan</option>   
+                                <option value="Kasi Pemerintahan">Kasi Pemerintahan</option>   
+                                <option value="Kasi Kesejahteraan">Kasi Kesejahteraan</option>   
+                                <option value="Kasi Pelayanan">Kasi Pelayanan</option>   
+                                <option value="Ketua BPD">Ketua BPD</option>  
+                                <option value="Wakil Ketua BPD">Wakil Ketua BPD</option>
+                                <option value="Sekretaris BPD">Sekretaris BPD</option>
+                                <option value="Anggota BPD">Anggota BPD</option>
+                                <option value="Mahasiswa Magang">Mahasiswa Magang</option>
+                            </select>
                         </div>
                         <div class="form-group">
                             <label for="status" class="form-label">Status</label>
@@ -284,7 +300,7 @@
                         </div>
                         <div class="form-group">
                             <label for="profile_picture">Profile</label>
-                            <input type="file" class="form-control" id="profile_picture" name="profile_picture">
+                            <input type="file" class="form-control" id="profile_picture" name="profile_picture" required>
                         </div>
                         <div class="form-group">
                             <label for="username" class="form-label">Username</label>

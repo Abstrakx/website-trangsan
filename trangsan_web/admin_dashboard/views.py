@@ -2,14 +2,23 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import make_password
+from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import default_storage
+from django.core.files.storage import FileSystemStorage
 from django.contrib import messages
 from django.utils import timezone
+from django.http import JsonResponse
+from django.conf import settings
+from django.urls import reverse
 from rest_framework import viewsets
+from functools import wraps
+from pyzbar.pyzbar import decode
+from PIL import Image
 from .models import Aduan, Barang, User, PeminjamanBarang
 from .utils import generate_prioritas_catatan
 from .serializers import AduanSerializer, UserSerializer, PeminjamanBarangSerializer, BarangSerializer
 from .forms import AduanStatusForm, UserForm, PeminjamanForm, PeminjamanBarangStatusForm
+import os
 
 # Menampilkan view aduan ke dalam REST API
 class AduanViewSet(viewsets.ModelViewSet):
@@ -332,7 +341,7 @@ def delete_peminjaman_barang(request):
             messages.error(request, 'Invalid ID.')
 
     # Redirect ke dashboard view yang sama
-    return redirect("dashboard_user")
+    return redirect("dashboard_peminjaman_barang")
 
 # View untuk mengubah status peminjaman di dashboard peminjaman
 @login_required(login_url='login')
@@ -357,16 +366,162 @@ def update_status_peminjaman(request, peminjaman_id):
 
 # View untuk mengubah status peminjaman ke Dikembalikan di dashboard peminjaman
 @login_required(login_url='login')
-def update_status_dikembalikan(request, peminjaman_id):
-    # Fetch semua data pemijaman
-    peminjaman = get_object_or_404(PeminjamanBarang, pk=peminjaman_id)
+def update_status_dikembalikan(request):
+    if request.method == 'POST':
+        id = request.POST.get('id')
+        kondisi_akhir = request.FILES.get('kondisi_akhir')  
 
-    # Mengganti status peminjaman barang ke dikembalikan
-    peminjaman.status = PeminjamanBarang.Status.DIKEMBALIKAN
-    peminjaman.tanggal_kembali = timezone.now()
+        # Fetch semua data pemijaman
+        peminjaman = get_object_or_404(PeminjamanBarang, id=id)
+        if peminjaman:
+            # Menambahkan foto kondisi akhir ke data peminjaman
+            peminjaman.kondisi_akhir = kondisi_akhir
 
-    # Simpan ke database
-    peminjaman.save()
+            # Mengganti status peminjaman barang ke dikembalikan
+            peminjaman.status = PeminjamanBarang.Status.DIKEMBALIKAN
+            peminjaman.tanggal_kembali = timezone.now()
+
+            # Simpan ke database
+            peminjaman.save()
+        else:
+            return redirect('dashboard_peminjaman_barang')
 
     # Redirect ke dashboard view yang sama
     return redirect('dashboard_peminjaman_barang')
+
+# View untuk menampilkan detail user di dashboard per user
+@login_required(login_url='login')
+def user_detail(request, id_user):
+    user = get_object_or_404(User, id_user=id_user)  
+    return render(request, 'dashboard_user_absensi.html', {'user': user})
+
+# View untuk melakukan deteksi QR Code dari request POST
+@csrf_exempt
+def detect_qr_code(request):
+    if request.method == 'POST':
+        try:
+            # Parse data JSON dari request
+            received_qr_code = request.POST.get('qr_code', '')
+            timestamp = request.POST.get('timestamp', '')
+            screenshot = request.FILES.get('screenshot', None)
+
+            # Mengekstrak QR Code dari qr_code_user
+            try:
+                received_id_user = received_qr_code.split('-')[0]
+            except IndexError:
+                return JsonResponse({'error': 'Invalid QR code format'}, status=400)
+
+            print(f"Received ID User: {received_id_user}")
+
+            # Menemukan user berdasarkan id usernya
+            try:
+                user = User.objects.filter(qr_code_user__icontains=received_id_user).exclude(qr_code_user__isnull=True).first()
+
+                if not user:
+                    return JsonResponse({'error': 'User not found with provided ID User'}, status=404)
+
+                # Mendapatkan QR Code path dari static files
+                qr_image_path = os.path.join(settings.MEDIA_ROOT, 'qr_code_user', str(user.qr_code_user).split('/')[-1])
+
+                # Membaca dan decode QR Code dari gambar yang disimpan menggunakan pyzbar
+                if os.path.exists(qr_image_path):
+                    stored_image = Image.open(qr_image_path)
+                    qr_data_list = decode(stored_image)
+
+                    if not qr_data_list:
+                        return JsonResponse({
+                            'error': 'Could not detect QR code in stored image',
+                            'path': qr_image_path
+                        }, status=500)
+
+                    # Melakukan decode QR Code data
+                    stored_qr_data = qr_data_list[0].data.decode('utf-8')
+
+                    print(f"Stored QR Data: {stored_qr_data}")
+                    print(f"Received QR Data: {received_qr_code}")
+
+                    # Melakukan komparasi QR Code dari recived QR Code dan stored QR Code
+                    if stored_qr_data != received_qr_code:
+                        return JsonResponse({
+                            'error': 'QR code mismatch',
+                            'stored': stored_qr_data,
+                            'received': received_qr_code
+                        }, status=400)
+                else:
+                    return JsonResponse({
+                        'error': 'Stored QR image not found',
+                        'path': qr_image_path
+                    }, status=404)
+
+            except Exception as e:
+                return JsonResponse({
+                    'error': f'Error validating QR code: {str(e)}',
+                    'qr_code': str(user.qr_code_aerobo) if user else 'No user found'
+                }, status=400)
+
+            # Save the screenshot if provided
+            last_in_entry = {
+                "datetime": timestamp,
+                "screenshot": None,
+                "status_absensi": "Absen Diajukan",
+            }
+            if screenshot:
+                # Menggunakan FileSystemStorage untuk penanganan `upload_to` yang propper
+                fs = FileSystemStorage(location=os.path.join(settings.MEDIA_ROOT, 'screenshots'))
+                screenshot_filename = f'{received_qr_code}.png'
+                filename = fs.save(screenshot_filename, screenshot)
+                screenshot_url = fs.url(filename)
+                last_in_entry["screenshot"] = f'media/screenshots/{os.path.basename(screenshot_url)}'
+
+            # Update JSONField for last_in entry
+            if not user.last_in:
+                user.last_in = []
+            user.last_in.append(last_in_entry)
+            user.save()
+
+            return JsonResponse({
+                'message': 'QR code validated and data saved successfully',
+                'user': {
+                    'id_user': received_id_user,
+                    'name': user.nama_user if hasattr(user, 'nama_user') else None
+                },
+                'screenshot_url': last_in_entry["screenshot"]
+            })
+
+        except Exception as e:
+            return JsonResponse({'error': f'An unexpected error occurred: {str(e)}'}, status=500)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+# View untuk mengupdate status absensi user
+@login_required(login_url='login')
+def update_status_absensi(request, id_user, index):
+    user = get_object_or_404(User, id_user=id_user)  
+
+    # Validate the index
+    if user.last_in and 0 <= index < len(user.last_in):
+        if request.method == "POST":
+            # Get the new status from the form
+            new_status = request.POST.get("status_absensi", "").strip()
+            if new_status:  # Ensure the new status is not empty
+                # Copy and update the JSONField data
+                last_in_data = user.last_in
+                last_in_data[index]["status_absensi"] = new_status
+                
+                # Save the updated JSONField
+                user.last_in = last_in_data
+                user.save(update_fields=["last_in"])  # Save only the JSON field
+                
+                # Redirect to the user detail page after saving
+                return redirect(reverse('user_detail', args=[user.id_user]))
+        
+        # Render the form with the current status
+        context = {
+            "user": user,
+            "entry_index": index,
+            "current_status": user.last_in[index]["status_absensi"],
+        }
+        return render(request, "dashboard_user_absensi.html", context)
+    
+    # If the index is invalid, redirect to user detail
+    return redirect(reverse('user_detail', args=[user.id_user]))

@@ -31,7 +31,6 @@ body {
 .logo {
     width: 100%; 
     max-width: 270px; 
-    height: 84px; 
     margin-left: 10px;
 }
 
@@ -39,7 +38,6 @@ body {
 @media (max-width: 768px) {
 .logo {
         max-width: 240px; 
-        height: 65px; 
     }
 }
 

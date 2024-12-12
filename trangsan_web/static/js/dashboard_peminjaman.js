@@ -40,6 +40,15 @@ $('#showKondisiAkhir').on('show.bs.modal', function (event) {
     $('.request-date').html("<b>Pengembalian : </b>" + tanggal_kembali);
 });
 
+// Fungsi javascript untuk menampilkan modal pengembalian barang dari Dashboard
+$(document).ready(function(){
+    // Pass id peminjaman ke modal
+    $('.pengembalian').click(function(){
+        var id_pengembalian = $(this).data('id_pengembalian');
+        $('#pengembalian_id').val(id_pengembalian);
+    });
+});
+
 // Fungsi javascript untuk menampilkan modal delete data peminjaman dari Dashboard
 $(document).ready(function(){
     // Pass id peminjaman ke delete modal
