@@ -127,19 +127,16 @@
                                 <td>{{ aduan.tanggal_aduan }}</td>
                                 <td>{{ aduan.isi_aduan }}</td>
                                 <td>
-                                    {% if aduan.status == 'Baru' %}
-                                    <div class="btn-status" style="background-color: #EA9610;">
-                                        <div class="text-wrapper" style="color: #ffffff;">{{ aduan.status }}</div>
-                                    </div>
-                                    {% elif aduan.status == 'Diproses' %}
-                                    <div class="btn-status" style="background-color: rgba(36, 99, 49, 0.5);">
-                                        <div class="text-wrapper" style="color: #246331;">{{ aduan.status }}</div>
-                                    </div>
-                                    {% elif aduan.status == 'Selesai' %}
-                                    <div class="btn-status" style="background-color: #246331;">
-                                        <div class="text-wrapper" style="color: #ffffff;">{{ aduan.status }}</div>
-                                    </div>
-                                    {% endif %}
+                                    <form method="POST" action="{% url 'update_status_aduan' aduan.id %}">
+                                        {% csrf_token %}
+                                        <div class="dropdown">
+                                            <select name="status" class="form-control" onchange="this.form.submit()">
+                                                <option value="Baru" {% if aduan.status == 'Baru' %}selected{% endif %}>Baru</option>
+                                                <option value="Diproses" {% if aduan.status == 'Diproses' %}selected{% endif %}>Diproses</option>
+                                                <option value="Selesai" {% if aduan.status == 'Selesai' %}selected{% endif %}>Selesai</option>
+                                            </select>
+                                        </div>
+                                    </form>
                                 </td>
                                 <td>{{ aduan.kategori }}</td>
                                 <td>
