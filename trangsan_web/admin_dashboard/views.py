@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import make_password, check_password
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import default_storage
 from django.core.files.storage import FileSystemStorage
@@ -17,7 +17,7 @@ from PIL import Image
 from .models import Aduan, Barang, User, PeminjamanBarang
 from .utils import generate_prioritas_catatan
 from .serializers import AduanSerializer, UserSerializer, PeminjamanBarangSerializer, BarangSerializer
-from .forms import AduanStatusForm, UserForm, PeminjamanForm, PeminjamanBarangStatusForm
+from .forms import AduanStatusForm, UserForm, PeminjamanForm, PeminjamanBarangStatusForm, login_user_form
 import os
 
 # Menampilkan view aduan ke dalam REST API
@@ -473,7 +473,7 @@ def detect_qr_code(request):
                 screenshot_url = fs.url(filename)
                 last_in_entry["screenshot"] = f'media/screenshots/{os.path.basename(screenshot_url)}'
 
-            # Update JSONField for last_in entry
+            # Update JSONField untuk entri last_in 
             if not user.last_in:
                 user.last_in = []
             user.last_in.append(last_in_entry)
@@ -498,24 +498,24 @@ def detect_qr_code(request):
 def update_status_absensi(request, id_user, index):
     user = get_object_or_404(User, id_user=id_user)  
 
-    # Validate the index
+    # Validasi indexing dari field last_in user
     if user.last_in and 0 <= index < len(user.last_in):
         if request.method == "POST":
-            # Get the new status from the form
+            # Mendapatkan status baru dari form 
             new_status = request.POST.get("status_absensi", "").strip()
-            if new_status:  # Ensure the new status is not empty
-                # Copy and update the JSONField data
+            if new_status:  
+                # Copy dan update JSONField data
                 last_in_data = user.last_in
                 last_in_data[index]["status_absensi"] = new_status
                 
-                # Save the updated JSONField
+                # Menyimpan updated JSONField
                 user.last_in = last_in_data
-                user.save(update_fields=["last_in"])  # Save only the JSON field
+                user.save(update_fields=["last_in"])  
                 
-                # Redirect to the user detail page after saving
+                # Redirect ke user detail page setelah menyimpan data
                 return redirect(reverse('user_detail', args=[user.id_user]))
         
-        # Render the form with the current status
+        # Render form dengan status sekarang 
         context = {
             "user": user,
             "entry_index": index,
@@ -523,5 +523,213 @@ def update_status_absensi(request, id_user, index):
         }
         return render(request, "dashboard_user_absensi.html", context)
     
-    # If the index is invalid, redirect to user detail
+    # Jika index tidak valid maka dikembalikan lagi ke user detail page
     return redirect(reverse('user_detail', args=[user.id_user]))
+
+# Decorator untuk memeriksa apakah user sudah login atau belum
+def user_login_required(view_func):
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if 'id_user' not in request.session:
+            return redirect('user_login')  
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
+# View untuk login user
+def user_login(request):
+    if request.method == 'POST':
+        form = login_user_form(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+
+            user = User.objects.get(username=username)
+
+            if check_password(password, user.password):
+                request.session['id_user'] = user.id_user
+                return redirect(reverse('homepage_main', args=[user.id_user]))
+            else:
+                return render(request, 'login_user.html', {
+                    'form': form,
+                    'error': 'Password salah.'
+                })
+    else:
+        form = login_user_form()
+    
+    return render(request, 'login_user.html')
+
+# View untuk logout user
+def user_logout(request):
+    if 'id_user' in request.session:
+        del request.session['id_user']
+    return redirect('homepage_login')
+
+# View untuk homepage user
+def homepage_login(request): 
+    return render(request, 'homepage_login.html')
+
+@user_login_required
+def homepage_main(request, id_user):
+    user = get_object_or_404(User, id_user=id_user)
+
+    if request.method == "POST":
+        form = PeminjamanForm(request.POST, request.FILES)
+        form.instance.user = user.id_user
+
+        # Melakukan validasi form dan menyimpan data
+        if form.is_valid():
+            peminjaman = form.save(commit=False)
+            peminjaman.save()
+            
+            # Redirect ke dashboard view yang sama
+            return redirect(reverse('homepage_main', args=[user.id_user]))
+        else:
+            messages.error(request, 'Invalid form.')
+    else:
+        form = PeminjamanForm(initial={'user': user.id_user})
+
+    # Pass User list dan form context ke template
+    context = {
+        "form": form,
+        "user": user,
+    }
+
+    return render(request, 'homepage_main.html', context)
+
+@user_login_required
+def homepage_peminjaman(request, id_user):
+    user = get_object_or_404(User, id_user=id_user)
+    barang_list = Barang.objects.all()
+
+    if request.method == "POST":
+        form = PeminjamanForm(request.POST, request.FILES)
+        form.instance.user = user
+
+        # Melakukan validasi form dan menyimpan data
+        if form.is_valid():
+            peminjaman = form.save(commit=False)
+            peminjaman.save()
+            
+            # Redirect ke dashboard view yang sama
+            return redirect(reverse('homepage_peminjaman_user', args=[user.id_user]))
+        else:
+            messages.error(request, 'Invalid form.')
+    else:
+        form = PeminjamanForm(initial={'user': user.id_user})
+
+    # Pass User list dan form context ke template
+    context = {
+        "form": form,
+        "barang_list": barang_list,
+        "user": user,
+    }
+
+    return render(request, 'homepage_peminjaman.html', context)
+
+@user_login_required
+def homepage_peminjaman_user(request, id_user):
+    user = get_object_or_404(User, id_user=id_user)
+    peminjaman_list = PeminjamanBarang.objects.filter(user=user.id_user)
+
+    if request.method == "POST":
+        form = PeminjamanForm(request.POST, request.FILES)
+        form.instance.user = user
+
+        # Melakukan validasi form dan menyimpan data
+        if form.is_valid():
+            peminjaman = form.save(commit=False)
+            peminjaman.save()
+            
+            # Redirect ke dashboard view yang sama
+            return redirect(reverse('homepage_peminjaman_user', args=[user.id_user]))
+        else:
+            messages.error(request, 'Invalid form.')
+    else:
+        form = PeminjamanForm(initial={'user': user.id_user})
+
+    # Pass User list dan form context ke template
+    context = {
+        "form": form,
+        "peminjaman_list": peminjaman_list,
+        "user": user,
+    }
+
+    return render(request, 'homepage_peminjaman_user.html', context)
+
+@user_login_required
+def homepage_aduan(request, id_user):
+    user = get_object_or_404(User, id_user=id_user)
+    aduan_list = Aduan.objects.all()
+
+    # Pass User list dan form context ke template
+    context = {
+        "aduan_list": aduan_list,
+        "user": user,
+    }
+
+    return render(request, 'homepage_aduan.html', context)
+
+@user_login_required
+def user_aduan_form(request, id_user):
+    user = get_object_or_404(User, id_user=id_user)
+
+    if request.method == 'POST':
+        nama_pengadu = request.POST.get('nama_user', '')
+        isi_aduan = request.POST.get('isi_aduan', '')
+        kategori = request.POST.get('kategori', '')
+        status = 'Baru'
+
+        # Dapatkan prioritas dan catatan dari GPT
+        prioritas, catatan = generate_prioritas_catatan(isi_aduan)
+
+        # Simpan ke database
+        aduan = Aduan(
+            nama_pengadu=nama_pengadu,
+            isi_aduan=isi_aduan,
+            kategori=kategori,
+            status=status,
+            prioritas=prioritas,
+            catatan=catatan,
+        )
+        aduan.save()
+
+        return redirect(reverse('homepage_aduan', args=[user.id_user]))
+        
+    return redirect(reverse('homepage_aduan', args=[user.id_user]))
+
+@user_login_required
+def homepage_pegawai(request, id_user):
+    user = get_object_or_404(User, id_user=id_user)
+
+    context = {
+        'user': user,
+    }
+
+    # Render the dashboard
+    return render(request, 'homepage_pegawai.html', context)
+
+@user_login_required
+def update_status_dikembalikan_user(request, id_user):
+    user = get_object_or_404(User, id_user=id_user)
+
+    if request.method == 'POST':
+        id = request.POST.get('id')
+        kondisi_akhir = request.FILES.get('kondisi_akhir')  
+
+        # Fetch semua data pemijaman
+        peminjaman = get_object_or_404(PeminjamanBarang, id=id)
+        if peminjaman:
+            # Menambahkan foto kondisi akhir ke data peminjaman
+            peminjaman.kondisi_akhir = kondisi_akhir
+
+            # Mengganti status peminjaman barang ke dikembalikan
+            peminjaman.status = PeminjamanBarang.Status.DIKEMBALIKAN
+            peminjaman.tanggal_kembali = timezone.now()
+
+            # Simpan ke database
+            peminjaman.save()
+        else:
+            return redirect(reverse('homepage_peminjaman_user', args=[user.id_user]))
+
+    # Redirect ke dashboard view yang sama
+    return redirect(reverse('homepage_peminjaman_user', args=[user.id_user]))

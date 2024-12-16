@@ -4,7 +4,7 @@ from datetime import datetime
 import time
 
 # Backend API endpoint
-API_URL = 'http://127.0.0.1:8000/api/detect_qr_code/'
+API_URL = 'http://abstrakxyz.pythonanywhere.com/api/detect_qr_code/'
 
 # Initialize webcam
 cap = cv2.VideoCapture(0)

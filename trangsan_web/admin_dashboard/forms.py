@@ -78,3 +78,9 @@ class PeminjamanBarangStatusForm(forms.ModelForm):
     ]
     
     status = forms.ChoiceField(choices=STATUS_CHOICES, widget=forms.Select(attrs={'class': 'form-control'}))
+
+# Form untuk login user ke homepage
+class login_user_form(forms.Form):
+    username = forms.CharField(label="Username", max_length=150, required=True)
+    password = forms.CharField(widget=forms.PasswordInput, label="Password", required=True)
+

@@ -170,7 +170,11 @@
                                     {% endif %}
                                 </td>                                                        
                                 <td>
-                                    <a href="{% url 'user_detail' user.id_user %}" class="btn btn-info text-light">View Details</a>
+                                    {% if user.status == "Pemerintah Desa" %}
+                                        <a href="{% url 'user_detail' user.id_user %}" class="btn btn-info text-light">View Details</a>
+                                    {% else %}
+                                        -
+                                    {% endif %}
                                 </td>  
                                 <td>
                                     <!-- Edit User Modal Trigger -->
@@ -288,6 +292,7 @@
                                 <option value="Sekretaris BPD">Sekretaris BPD</option>
                                 <option value="Anggota BPD">Anggota BPD</option>
                                 <option value="Mahasiswa Magang">Mahasiswa Magang</option>
+                                <option value="-">-</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -300,7 +305,7 @@
                         </div>
                         <div class="form-group">
                             <label for="profile_picture">Profile</label>
-                            <input type="file" class="form-control" id="profile_picture" name="profile_picture" required>
+                            <input type="file" class="form-control" id="profile_picture" name="profile_picture" >
                         </div>
                         <div class="form-group">
                             <label for="username" class="form-label">Username</label>

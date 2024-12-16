@@ -9,7 +9,7 @@
     <title>Dashboard Aduan Masyarakat</title>
 
     <!-- External Stylesheets -->
-    <link rel="stylesheet" href="{% static 'css/dashboard_aduan.css' %}">
+    <link rel="stylesheet" href="{% static 'css/homepage_aduan.css' %}">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap">
@@ -28,13 +28,12 @@
 </head>
 
 <body>
-
     <!-- Section B: Navigation Bar -->
-    <nav class="navbar navbar-expand-lg navbar-light">
-        <div class="container-fluid">
-            <a class="navbar-brand">
+    <nav class="bg-white shadow-sm navbar navbar-expand-lg">
+        <div class="container py-3 d-flex justify-content-between align-items-center">
+            <div class="logo d-flex align-items-center">
                 <img src="{% static 'images/logo_trangsan.png' %}" alt="Logo" class="logo d-inline-block align-text-top" />
-            </a>
+            </div>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -42,10 +41,18 @@
 
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto button-layout">
-                    <li class="nav-item w-100"> 
-                        <form method="POST" action="{% url 'logout' %}">
+                    <li><a href="{% url 'homepage_main' user.id_user %}" class="nav-link text-navbar" style="color: #000000;">Home</a></li>
+                    <li><a class="nav-link text-navbar-select">Aduan Masalah</a></li>
+                    <li><a href="{% url 'homepage_peminjaman' user.id_user %}" class="nav-link text-navbar" style="color: #000000;">Peminjaman Barang</a></li>
+                    {% if user.status == "Pemerintah Desa" %}
+                        <li><a href="{% url 'homepage_pegawai' user.id_user %}" class="nav-link text-navbar" style="color: #000000;">Pegawai</a></li>
+                    {% endif %}
+                </ul>
+                <ul class="navbar-nav ms-auto button-layout">
+                    <li>
+                        <form method="POST" action="{% url 'user_logout' %}">
                             {% csrf_token %}
-                            <button type="submit" class="btn-logout w-100 mx-auto">
+                            <button type="submit" class="btn-logout">
                                 Logout
                                 <img src="{% static 'icons/logout.svg' %}" alt="Logout" class="logout-icon" />
                             </button>
@@ -53,53 +60,24 @@
                     </li>
                 </ul>
             </div>
-
         </div>
     </nav>
 
-    <!-- Section C: Main Content -->
-    <div class="container-fluid" style="margin-top: -20px;">
+    <div class="container-sm" style="margin-top: -20px;">
         <div class="table-responsive">
             <div class="table-wrapper">
                 <!-- Table Title -->
                 <div class="table-title">
                     <div class="d-flex justify-content-between align-items-center">
-                        <!-- Component Aduan Masyarakat -->
-                        <div class="component" style="background-color: #22539c;">
+                        <div class="component-text" style="background-color: #ffffff;">
                             <div class="button">
-                                <img src="{% static 'icons/computer_white.svg' %}" alt="computer" class="vector" />
-                                <div class="text-wrapper" style="color: #ffffff; ">Data Aduan Masyarakat</div>
+                                <div class="text-wrapper-title" style="color: #000000; "><b>Daftar Aduan Masalah Trangsan</b></div>
                             </div>
                         </div>
-                        
-                        <!-- Component Peminjaman Barang -->
-                        <a href="{% url 'dashboard_peminjaman_barang' %}" class="component" style="background-color: #EBE8E4; text-decoration: none;">
-                            <div class="button">
-                                <img src="{% static 'icons/storage.svg' %}" alt="storage" class="vector" />
-                                <div class="text-wrapper" style="color: #A09B99; ">Peminjaman Barang</div>
-                            </div>
-                        </a>
-
-                        <!-- Component Data Inventaris   -->
-                        <a href="{% url 'dashboard_barang' %}" class="component" style="background-color: #EBE8E4; text-decoration: none;">
-                            <div class="button">
-                                <img src="{% static 'icons/storage.svg' %}" alt="storage" class="vector" />
-                                <div class="text-wrapper" style="color: #A09B99; ">Data Inventaris</div>
-                            </div>
-                        </a>
-
-                        <!-- Component Absensi -->
-                        <a href="{% url 'dashboard_user' %}" class="component" style="background-color: #EBE8E4; text-decoration: none;">
-                            <div class="button">
-                                <img src="{% static 'icons/presence.svg' %}" alt="presence" class="vector" />
-                                <div class="text-wrapper" style="color: #A09B99; ">Data Absen</div>
-                            </div>
-                        </a>
 
                         <div class="btn-group mt-md-0">		
-                            <a href="#addAduanModal" class="btn btn-success" data-toggle="modal">
-                                <div class="icon-wrapper">+</div>
-                                <div class="text-wrapper">Tambah Data Aduan</div>
+                            <a href="#adukanMasalah" data-toggle="modal" class="btn-peminjaman" data-nama_user="{{ user.nama_user }}">
+                                <div class="text-wrapper">Adukan Masalah</div>
                             </a>
                         </div>
                     </div>
@@ -162,50 +140,50 @@
                             {% endfor %}
                         {% else %}
                             <tr>
-                                <td colspan="8" style="text-align:center;">Tidak ada data aduan Masyarakat</td>
+                                <td colspan="7" style="text-align:center;">Tidak ada data aduan Masyarakat</td>
                             </tr>
                         {% endif %}
                     </tbody>
                 </table>
             </div>
         </div>
-    </div>
-
-    <!-- Add Aduan Modal -->
-    <div id="addAduanModal" class="modal fade">
+    </div>    
+    
+    <!-- Adukan Masalah Modal -->
+    <div id="adukanMasalah" class="modal fade">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form method="POST" action="" enctype="multipart/form-data">
-                    {% csrf_token %}
+                <form method="POST" action="{% url 'user_aduan_form' user.id_user %}">
                     <div class="modal-header">
-                        <h4 class="modal-title">Menambahkan Aduan Masyarakat</h4>
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title"><b>Formulir Aduan Masalah</b></h4>
                     </div>
+                    {% csrf_token %}
                     <div class="modal-body">
+                        <p><i>Harap diisi dengan sebenar-benarnya!</i></p>
                         <div class="form-group">
-                            <label for="nama_pengadu" class="form-label">Nama Pengadu</label>
-                            <input type="text" class="form-control" id="nama_pengadu" name="nama_pengadu" required>                        
+                            <label for="nama_user" class="form-label">Nama Pengadu</label>
+                            <input type="text" class="form-control" id="nama_user" name="nama_user" readonly required>                        
                         </div>
                         <div class="form-group">
                             <label for="isi_aduan" class="form-label">Isi Aduan</label>
-                            <textarea class="form-control" id="isi_aduan" name="isi_aduan" rows="3" required></textarea>                       
+                            <textarea placeholder='Kepada Yth. Pemerintah Desa Trangsan, Saya ingin mengajukan aduan terkait kesalahan data pada Kartu Keluarga saya. Nama anak saya tercatat salah di bagian kolom nama anggota keluarga. Seharusnya tertulis "Ahmad Rizki", tetapi di data Kartu Keluarga tertulis "Ahmad Risky". Kesalahan ini membuat saya mengalami kesulitan saat mengurus administrasi sekolah anak' rows="4" cols="50" class="form-control" id="isi_aduan" name="isi_aduan" style="font-style: italic;" required></textarea>                       
                         </div>
                         <div class="form-group">
                             <label for="kategori" class="form-label">Kategori</label>
-                            <select class="form-select" id="kategori" name="kategori" required>
+                            <select class="form-select" id="kategori" name="kategori" required>    
                                 <option value="" selected disabled>Pilih Kategori</option>
                                 <option value="Administrasi">Administrasi</option>
-                                <option value="Kebersihan">Kebersihan</option>
-                                <option value="Kamtibmas">Kamtibmas</option>
-                                <option value="Infrastruktur">Infrastruktur</option>
-                                <option value="Anggaran">Anggaran</option>
-                                <option value="Lainnya">Lainnya</option>
+                                <option value="Infrastruktur">Infrastruktur</option>   
+                                <option value="Kamtibmas">Kamtibmas</option>   
+                                <option value="Kebersihan">Kebersihan</option>   
+                                <option value="Anggaran">Anggaran</option>   
+                                <option value="Lainnya">Lainnya</option>   
                             </select>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
-                        <input type="submit" class="btn btn-success" value="Add">
+                        <input type="submit" class="btn-modal-custom" value="Kirim Aduan">
                     </div>
                 </form>
             </div>
@@ -213,5 +191,8 @@
     </div>
 
 </body>
+
+<!-- External JavaScript Libraries -->
+<script src="{% static 'js/homepage.js' %}"></script>
 
 </html>

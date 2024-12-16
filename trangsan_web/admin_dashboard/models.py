@@ -167,7 +167,7 @@ class PeminjamanBarang(models.Model):
             self.barang.save()
 
         # Mengganti status barang jika barang tersedia
-        if self.barang.jumlah >= 0:
+        if self.barang.jumlah > 0:
             self.barang.status = 'Tersedia'
             self.barang.save()
 
